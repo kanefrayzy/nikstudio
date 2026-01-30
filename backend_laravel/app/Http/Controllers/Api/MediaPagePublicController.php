@@ -39,11 +39,9 @@ class MediaPagePublicController extends Controller
     public function index()
     {
         try {
-            // Try to get cached data first
-            $cacheKey = 'media_page_public_data';
-            $mediaPageData = Cache::remember($cacheKey, self::CACHE_DURATION, function () {
-                return $this->buildMediaPageData();
-            });
+            // Always build fresh data - no caching to ensure latest content
+            // Cache was causing issues with media not updating after admin changes
+            $mediaPageData = $this->buildMediaPageData();
 
             return response()->json([
                 'success' => true,
@@ -71,34 +69,26 @@ class MediaPagePublicController extends Controller
      */
     private function buildMediaPageData()
     {
-        // Get page content with caching
-        $pageContent = Cache::remember('media_page_content', self::CACHE_DURATION, function () {
-            return MediaPageContent::first();
-        });
+        // Get page content - no caching
+        $pageContent = MediaPageContent::first();
         
-        // Get services with optimized eager loading
-        $services = Cache::remember('media_services_with_relations', self::CACHE_DURATION, function () {
-            return MediaService::with([
-                'features' => function ($query) {
-                    $query->orderBy('order');
-                },
-                'mediaItems' => function ($query) {
-                    $query->orderBy('group_id')->orderBy('order');
-                }
-            ])
-            ->ordered()
-            ->get();
-        });
+        // Get services with optimized eager loading - no caching
+        $services = MediaService::with([
+            'features' => function ($query) {
+                $query->orderBy('order');
+            },
+            'mediaItems' => function ($query) {
+                $query->orderBy('group_id')->orderBy('order');
+            }
+        ])
+        ->ordered()
+        ->get();
 
-        // Get testimonials with caching
-        $testimonials = Cache::remember('media_testimonials', self::CACHE_DURATION, function () {
-            return MediaTestimonial::ordered()->get();
-        });
+        // Get testimonials - no caching
+        $testimonials = MediaTestimonial::ordered()->get();
 
-        // Get process steps with caching
-        $processSteps = Cache::remember('media_process_steps', self::CACHE_DURATION, function () {
-            return MediaProcessStep::ordered()->get();
-        });
+        // Get process steps - no caching
+        $processSteps = MediaProcessStep::ordered()->get();
 
         return [
             'hero' => $this->transformHeroData($pageContent),

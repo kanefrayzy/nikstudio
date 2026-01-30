@@ -83,85 +83,68 @@ export const transformMediaPageData = (apiData: any) => {
 
 /**
  * Transform media array to slides format
- * Groups media into pairs for double-display slides
+ * Each media group from admin becomes one slide with main + secondary side by side
  */
 const transformMediaToSlides = (mediaArray: any[]) => {
   console.log('🎬 transformMediaToSlides input:', JSON.stringify(mediaArray, null, 2));
   
-  // First, collect all individual media items
-  const allMediaItems: Array<{
-    src: string;
-    type: string;
-    poster: string | null;
-  }> = [];
-  
-  mediaArray.forEach((mediaGroup: any, index: number) => {
+  const result = mediaArray.map((mediaGroup: any, index: number) => {
     console.log(`📦 Processing media group ${index}:`, JSON.stringify(mediaGroup, null, 2));
     
-    // Add main media if exists
+    // Transform main media
     const mainMedia = mediaGroup.main;
-    if (mainMedia?.src) {
-      const mainType = mainMedia?.type || 'image';
-      const mainIsVideo = mainType === 'video';
-      allMediaItems.push({
-        src: addStoragePrefix(mainMedia.src, mainIsVideo),
-        type: mainType,
-        poster: mainMedia.poster ? addStoragePrefix(mainMedia.poster, false) : null
-      });
-    }
+    const mainType = mainMedia?.type || 'image';
+    const mainIsVideo = mainType === 'video';
+    const mainImage = mainMedia?.src ? addStoragePrefix(mainMedia.src, mainIsVideo) : '';
+    const mainPoster = mainMedia?.poster ? addStoragePrefix(mainMedia.poster, false) : null;
     
-    // Add secondary media if exists
+    console.log(`🎯 Main media for group ${index}:`, { mainImage, mainType, mainPoster });
+    
+    // Transform secondary media - handle both array and single object
     const secondaryArray = mediaGroup.secondary || [];
     console.log(`📎 Secondary array for group ${index}:`, JSON.stringify(secondaryArray, null, 2));
     
-    if (Array.isArray(secondaryArray)) {
-      secondaryArray.forEach((secondary: any) => {
-        if (secondary?.src) {
-          const secondaryType = secondary?.type || 'image';
-          const secondaryIsVideo = secondaryType === 'video';
-          allMediaItems.push({
-            src: addStoragePrefix(secondary.src, secondaryIsVideo),
-            type: secondaryType,
-            poster: secondary.poster ? addStoragePrefix(secondary.poster, false) : null
-          });
-        }
-      });
+    let secondaryImage = '';
+    let secondaryType = 'image';
+    let secondaryPoster: string | null = null;
+    
+    // Get first valid secondary item
+    if (Array.isArray(secondaryArray) && secondaryArray.length > 0) {
+      const firstSecondary = secondaryArray[0];
+      if (firstSecondary?.src) {
+        secondaryType = firstSecondary?.type || 'image';
+        const secondaryIsVideo = secondaryType === 'video';
+        secondaryImage = addStoragePrefix(firstSecondary.src, secondaryIsVideo);
+        secondaryPoster = firstSecondary.poster ? addStoragePrefix(firstSecondary.poster, false) : null;
+      }
     } else if (secondaryArray?.src) {
-      const secondaryType = secondaryArray?.type || 'image';
+      // Handle case when secondary is a single object, not array
+      secondaryType = secondaryArray?.type || 'image';
       const secondaryIsVideo = secondaryType === 'video';
-      allMediaItems.push({
-        src: addStoragePrefix(secondaryArray.src, secondaryIsVideo),
-        type: secondaryType,
-        poster: secondaryArray.poster ? addStoragePrefix(secondaryArray.poster, false) : null
-      });
+      secondaryImage = addStoragePrefix(secondaryArray.src, secondaryIsVideo);
+      secondaryPoster = secondaryArray.poster ? addStoragePrefix(secondaryArray.poster, false) : null;
     }
-  });
-  
-  console.log('📋 All media items collected:', JSON.stringify(allMediaItems, null, 2));
-  
-  // Now pair media items into slides (2 items per slide)
-  const result = [];
-  for (let i = 0; i < allMediaItems.length; i += 2) {
-    const mainItem = allMediaItems[i];
-    const secondaryItem = allMediaItems[i + 1];
+    
+    console.log(`🎯 Secondary media for group ${index}:`, { secondaryImage, secondaryType, secondaryPoster });
     
     const slideData = {
-      mainImage: mainItem?.src || '',
-      mainPoster: mainItem?.poster || null,
-      mainType: mainItem?.type || 'image',
-      secondaryImage: secondaryItem?.src || '',
-      secondaryPoster: secondaryItem?.poster || null,
-      secondaryType: secondaryItem?.type || 'image'
+      mainImage,
+      mainPoster,
+      mainType,
+      secondaryImage,
+      secondaryPoster,
+      secondaryType
     };
     
-    // Only add slide if it has at least one valid media item
-    if (slideData.mainImage) {
-      result.push(slideData);
-    }
-  }
+    console.log(`✅ Slide ${index} result:`, JSON.stringify(slideData, null, 2));
+    return slideData;
+  });
   
-  console.log('🎯 transformMediaToSlides result:', JSON.stringify(result, null, 2));
-  return result;
+  // Filter out slides that have no valid media at all
+  const filteredResult = result.filter(slide => slide.mainImage || slide.secondaryImage);
+  
+  console.log('🎯 transformMediaToSlides final result:', JSON.stringify(filteredResult, null, 2));
+  return filteredResult;
 };
 
 /**
