@@ -83,42 +83,82 @@ export const transformMediaPageData = (apiData: any) => {
 
 /**
  * Transform media array to slides format
+ * Groups media into pairs for double-display slides
  */
 const transformMediaToSlides = (mediaArray: any[]) => {
   console.log('🎬 transformMediaToSlides input:', JSON.stringify(mediaArray, null, 2));
   
-  const result = mediaArray.map((mediaGroup: any, index: number) => {
+  // First, collect all individual media items
+  const allMediaItems: Array<{
+    src: string;
+    type: string;
+    poster: string | null;
+  }> = [];
+  
+  mediaArray.forEach((mediaGroup: any, index: number) => {
     console.log(`📦 Processing media group ${index}:`, JSON.stringify(mediaGroup, null, 2));
     
-    // Transform main media
+    // Add main media if exists
     const mainMedia = mediaGroup.main;
-    const mainType = mainMedia?.type || 'image';
-    const mainIsVideo = mainType === 'video';
-    const mainImage = addStoragePrefix(mainMedia?.src || '', mainIsVideo);
-    const mainPoster = mainMedia?.poster ? addStoragePrefix(mainMedia.poster, false) : null;
+    if (mainMedia?.src) {
+      const mainType = mainMedia?.type || 'image';
+      const mainIsVideo = mainType === 'video';
+      allMediaItems.push({
+        src: addStoragePrefix(mainMedia.src, mainIsVideo),
+        type: mainType,
+        poster: mainMedia.poster ? addStoragePrefix(mainMedia.poster, false) : null
+      });
+    }
     
-    // Transform secondary media (get first secondary item)
+    // Add secondary media if exists
     const secondaryArray = mediaGroup.secondary || [];
     console.log(`📎 Secondary array for group ${index}:`, JSON.stringify(secondaryArray, null, 2));
     
-    const firstSecondary = Array.isArray(secondaryArray) ? secondaryArray[0] : secondaryArray;
-    const secondaryType = firstSecondary?.type || 'image';
-    const secondaryIsVideo = secondaryType === 'video';
-    const secondaryImage = addStoragePrefix(firstSecondary?.src || '', secondaryIsVideo);
-    const secondaryPoster = firstSecondary?.poster ? addStoragePrefix(firstSecondary.poster, false) : null;
+    if (Array.isArray(secondaryArray)) {
+      secondaryArray.forEach((secondary: any) => {
+        if (secondary?.src) {
+          const secondaryType = secondary?.type || 'image';
+          const secondaryIsVideo = secondaryType === 'video';
+          allMediaItems.push({
+            src: addStoragePrefix(secondary.src, secondaryIsVideo),
+            type: secondaryType,
+            poster: secondary.poster ? addStoragePrefix(secondary.poster, false) : null
+          });
+        }
+      });
+    } else if (secondaryArray?.src) {
+      const secondaryType = secondaryArray?.type || 'image';
+      const secondaryIsVideo = secondaryType === 'video';
+      allMediaItems.push({
+        src: addStoragePrefix(secondaryArray.src, secondaryIsVideo),
+        type: secondaryType,
+        poster: secondaryArray.poster ? addStoragePrefix(secondaryArray.poster, false) : null
+      });
+    }
+  });
+  
+  console.log('📋 All media items collected:', JSON.stringify(allMediaItems, null, 2));
+  
+  // Now pair media items into slides (2 items per slide)
+  const result = [];
+  for (let i = 0; i < allMediaItems.length; i += 2) {
+    const mainItem = allMediaItems[i];
+    const secondaryItem = allMediaItems[i + 1];
     
     const slideData = {
-      mainImage,
-      mainPoster,
-      mainType,
-      secondaryImage,
-      secondaryPoster,
-      secondaryType
+      mainImage: mainItem?.src || '',
+      mainPoster: mainItem?.poster || null,
+      mainType: mainItem?.type || 'image',
+      secondaryImage: secondaryItem?.src || '',
+      secondaryPoster: secondaryItem?.poster || null,
+      secondaryType: secondaryItem?.type || 'image'
     };
     
-    console.log(`✅ Slide ${index} result:`, JSON.stringify(slideData, null, 2));
-    return slideData;
-  });
+    // Only add slide if it has at least one valid media item
+    if (slideData.mainImage) {
+      result.push(slideData);
+    }
+  }
   
   console.log('🎯 transformMediaToSlides result:', JSON.stringify(result, null, 2));
   return result;
