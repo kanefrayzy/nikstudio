@@ -331,6 +331,11 @@ export function MediaUploadGroup({
       return;
     }
 
+    if (!secondaryFile) {
+      setValidationError('Дополнительное медиа обязательно для загрузки (для отображения двух файлов рядом)');
+      return;
+    }
+
     // Check if video files have posters
     if (mainFile.type === 'video' && !mainFile.posterFile && !existingMainPoster) {
       setValidationError('Для видео файлов обязательно загрузить постер');
@@ -395,9 +400,11 @@ export function MediaUploadGroup({
   };
 
   // Check if form is valid for submission
+  // Both main and secondary files are required for a media group
   const isFormValid = mainFile && 
+    secondaryFile &&
     (mainFile.type !== 'video' || mainFile.posterFile || existingMainPoster) &&
-    (!secondaryFile || secondaryFile.type !== 'video' || secondaryFile.posterFile || existingSecondaryPoster);
+    (secondaryFile.type !== 'video' || secondaryFile.posterFile || existingSecondaryPoster);
 
   return (
     <Card className="w-full">
@@ -559,7 +566,7 @@ export function MediaUploadGroup({
           {/* Secondary Media */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-medium">Дополнительное медиа</Label>
+              <Label className="text-base font-medium">Дополнительное медиа *</Label>
               {secondaryFile && (
                 <Button
                   type="button"
@@ -719,8 +726,8 @@ export function MediaUploadGroup({
 
         {/* Help Text */}
         <div className="text-sm text-muted-foreground space-y-1">
-          <p>• Основное медиа обязательно для загрузки</p>
-          <p>• Дополнительное медиа необязательно</p>
+          <p>• Оба медиа (основное и дополнительное) обязательны для загрузки</p>
+          <p>• Они будут отображаться рядом на одном слайде</p>
           <p>• Для видео файлов обязательно загрузить постер-изображение</p>
           <p>• Максимальный размер: изображения 2МБ, видео 50МБ</p>
         </div>
