@@ -3,19 +3,21 @@ import { MediaPageData } from '@/types/media';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 /**
- * Fetch media page data from public API with caching
+ * Fetch media page data from public API
+ * No client-side caching - always fetch fresh data
  */
 export const fetchMediaPageData = async (): Promise<MediaPageData> => {
   try {
     console.log('🌐 Запрос к API:', `${API_BASE_URL}/api/public/media-page`);
     
     const response = await fetch(`${API_BASE_URL}/api/public/media-page`, {
-      // Add caching for client-side requests
-      next: { revalidate: 1800 }, // Cache for 30 minutes
-      cache: 'force-cache', // Request deduplication
+      // Disable caching to always get fresh data from server
+      cache: 'no-store',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
       },
       signal: AbortSignal.timeout(10000) // 10 second timeout
     });

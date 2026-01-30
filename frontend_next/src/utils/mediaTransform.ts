@@ -85,7 +85,11 @@ export const transformMediaPageData = (apiData: any) => {
  * Transform media array to slides format
  */
 const transformMediaToSlides = (mediaArray: any[]) => {
-  return mediaArray.map((mediaGroup: any) => {
+  console.log('🎬 transformMediaToSlides input:', JSON.stringify(mediaArray, null, 2));
+  
+  const result = mediaArray.map((mediaGroup: any, index: number) => {
+    console.log(`📦 Processing media group ${index}:`, JSON.stringify(mediaGroup, null, 2));
+    
     // Transform main media
     const mainMedia = mediaGroup.main;
     const mainType = mainMedia?.type || 'image';
@@ -95,13 +99,15 @@ const transformMediaToSlides = (mediaArray: any[]) => {
     
     // Transform secondary media (get first secondary item)
     const secondaryArray = mediaGroup.secondary || [];
+    console.log(`📎 Secondary array for group ${index}:`, JSON.stringify(secondaryArray, null, 2));
+    
     const firstSecondary = Array.isArray(secondaryArray) ? secondaryArray[0] : secondaryArray;
     const secondaryType = firstSecondary?.type || 'image';
     const secondaryIsVideo = secondaryType === 'video';
     const secondaryImage = addStoragePrefix(firstSecondary?.src || '', secondaryIsVideo);
     const secondaryPoster = firstSecondary?.poster ? addStoragePrefix(firstSecondary.poster, false) : null;
     
-    return {
+    const slideData = {
       mainImage,
       mainPoster,
       mainType,
@@ -109,7 +115,13 @@ const transformMediaToSlides = (mediaArray: any[]) => {
       secondaryPoster,
       secondaryType
     };
+    
+    console.log(`✅ Slide ${index} result:`, JSON.stringify(slideData, null, 2));
+    return slideData;
   });
+  
+  console.log('🎯 transformMediaToSlides result:', JSON.stringify(result, null, 2));
+  return result;
 };
 
 /**

@@ -48,7 +48,9 @@ class MediaPagePublicController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $mediaPageData
-            ]);
+            ])->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+              ->header('Pragma', 'no-cache')
+              ->header('Expires', '0');
 
         } catch (Exception $e) {
             Log::error('Error fetching public media page data: ' . $e->getMessage(), [
@@ -275,8 +277,11 @@ class MediaPagePublicController extends Controller
     private function normalizeFilePath($filePath)
     {
         if (!$filePath) {
+            Log::debug('normalizeFilePath: Empty file path provided');
             return null;
         }
+
+        Log::debug('normalizeFilePath: Processing file path', ['original' => $filePath]);
 
         // Remove /storage/ prefix if present
         $normalizedPath = ltrim($filePath, '/');
@@ -284,12 +289,21 @@ class MediaPagePublicController extends Controller
             $normalizedPath = substr($normalizedPath, 8); // Remove 'storage/'
         }
 
+        Log::debug('normalizeFilePath: Normalized path', ['normalized' => $normalizedPath]);
+
         // Ensure the file exists in storage
         if (!Storage::disk('public')->exists($normalizedPath)) {
-            Log::warning('File not found in storage: ' . $normalizedPath);
-            return null;
+            Log::warning('File not found in storage: ' . $normalizedPath, [
+                'original_path' => $filePath,
+                'normalized_path' => $normalizedPath,
+                'storage_path' => Storage::disk('public')->path($normalizedPath)
+            ]);
+            // Return the path anyway - the file might exist but Storage check might fail
+            // This allows the frontend to try loading the file
+            return $normalizedPath;
         }
 
+        Log::debug('normalizeFilePath: File exists', ['path' => $normalizedPath]);
         // Return the normalized path without /storage/ prefix
         return $normalizedPath;
     }
