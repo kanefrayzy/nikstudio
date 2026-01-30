@@ -1,0 +1,192 @@
+/**
+ * Consolidated Cross-Browser Compatibility Styles
+ * Optimized for production with minimal duplication
+ */
+
+/* ==========================================================================
+   CSS Feature Detection with @supports
+   ========================================================================== */
+
+/* CSS Grid with Flexbox Fallback */
+@supports not (display: grid) {
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .grid > * {
+    flex: 1;
+    min-width: 300px;
+    margin: 0.5rem;
+  }
+}
+
+/* Flexbox gap fallbacks */
+@supports not (gap: 1rem) {
+  .flex.gap-1 > * + * { margin-left: 0.25rem; }
+  .flex.gap-2 > * + * { margin-left: 0.5rem; }
+  .flex.gap-4 > * + * { margin-left: 1rem; }
+  .flex.flex-col.gap-1 > * + * { margin-top: 0.25rem; margin-left: 0; }
+  .flex.flex-col.gap-2 > * + * { margin-top: 0.5rem; margin-left: 0; }
+  .flex.flex-col.gap-4 > * + * { margin-top: 1rem; margin-left: 0; }
+}
+
+/* Sticky positioning fallback */
+@supports not (position: sticky) {
+  .sticky {
+    position: fixed;
+    top: 0;
+    z-index: 50;
+  }
+}
+
+/* Backdrop filter fallback */
+@supports not (backdrop-filter: blur(10px)) {
+  .backdrop-blur-sm { background-color: rgba(255, 255, 255, 0.8); }
+  .backdrop-blur-md { background-color: rgba(255, 255, 255, 0.9); }
+  .dark .backdrop-blur-sm { background-color: rgba(0, 0, 0, 0.8); }
+  .dark .backdrop-blur-md { background-color: rgba(0, 0, 0, 0.9); }
+}
+
+/* Aspect ratio with fallback */
+@supports not (aspect-ratio: 1) {
+  .aspect-square {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+  }
+  .aspect-square > * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* ==========================================================================
+   Admin Interface Compatibility
+   ========================================================================== */
+
+/* Dialog/Modal Compatibility */
+.dialog-polyfill {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1000 !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+
+/* File Input Compatibility */
+input[type="file"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  margin-right: 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: #e5e7eb;
+}
+
+/* ==========================================================================
+   Touch-Friendly Interactions
+   ========================================================================== */
+
+.touch button,
+.touch .btn,
+.touch input[type="button"],
+.touch input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.touch input,
+.touch textarea,
+.touch select {
+  min-height: 44px;
+  padding: 12px;
+  font-size: 16px;
+  touch-action: manipulation;
+}
+
+/* ==========================================================================
+   Accessibility Support
+   ========================================================================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border { border-width: 2px; }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Mobile Safari Specific Fixes
+   ========================================================================== */
+
+/* Fix iOS Safari viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .full-height-mobile {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Fix iOS Safari input zoom */
+@media screen and (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+  .no-print { display: none !important; }
+  .print-break-before { page-break-before: always; }
+  .print-break-after { page-break-after: always; }
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
