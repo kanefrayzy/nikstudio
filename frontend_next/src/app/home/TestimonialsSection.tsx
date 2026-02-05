@@ -276,7 +276,7 @@ export default function TestimonialsSection({ content }: TestimonialsSectionProp
       </div>
 
       {/* Testimonial Cards - mobile */}
-      <TestimonialCarousel />
+      <TestimonialCarousel testimonials={testimonials} />
     </section>
   );
 }

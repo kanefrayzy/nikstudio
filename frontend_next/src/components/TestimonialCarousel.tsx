@@ -1,52 +1,21 @@
 import Image from "next/image";
 import { useState, useRef } from "react";
 
-const testimonials = [
-  {
-    title: "Exceptional Branding That Elevated Our Identity.",
-    text: "Their strategic approach completely transformed our brand. We've seen a huge increase in recognition and client engagement.",
-    image: "/images/home/testimonial-1.jpg",
-    name: "Трофимов Сергей",
-    company: "«Монитор СОФТ»"
-  },
-  {
-    title: "По итогам выставки был заключен контракт",
-    text: "The website they created is stunning, user-friendly, and has boosted our online conversions significantly. Highly recommend!",
-    image: "/images/home/testimonial-3.jpg",
-    name: "Юлия Данилова",
-    company: "Группа компаний «ИКАР»"
-  },
-  {
-    title: "Creative Solutions That Drove Real Results for Our Website.",
-    text: "Their designs are not only beautiful but effective. Our sales increased by 30% post-launch. Incredible experience!",
-    image: "/images/home/testimonial-5.jpg",
-    name: "Колушов Михаил",
-    company: "АО «НПП Авиаспецмаш»"
-  },
-  {
-    title: "Seamless Collaboration & Support With Exceptional Results.",
-    text: "Working with them was easy and efficient. They perfectly captured our vision, and the results were outstanding.",
-    image: "/images/home/testimonial-2.jpg",
-    name: "Александра Райкова",
-    company: "GARDEN Foresta"
-  },
-  {
-    title: "Запустили интернет магазин для розничной продукции",
-    text: "Our new branding resonated with our audience immediately. We've received so many compliments and new business inquiries.",
-    image: "/images/home/testimonial-4.jpg",
-    name: "Егорова Марина",
-    company: "«ЕГОРОВ мясо»"
-  },
-  {
-    title: "UX Design That Transformed Our User Experience.",
-    text: "Their UX design made our platform more intuitive and enjoyable to use. Customer satisfaction has dramatically improved.",
-    image: "/images/home/testimonial-6.jpg",
-    name: "Дмитрий Страшкевич",
-    company: "«Эко Стиль»"
-  }
-];
+// Testimonial data structure
+interface Testimonial {
+  quote: string;
+  description: string;
+  authorName: string;
+  authorCompany: string;
+  authorPhoto: string;
+  bgColor: string;
+}
 
-export default function TestimonialCarousel() {
+interface TestimonialCarouselProps {
+  testimonials: Testimonial[];
+}
+
+export default function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -139,19 +108,19 @@ export default function TestimonialCarousel() {
             <div className="flex flex-col justify-between flex-1 mt-[60px] sm:mt-[95px]">
               <div className="flex flex-col gap-4 lg:gap-8">
                 <h3 className="text-white font-geometria sm:font-inter font-medium sm:font-semibold text-[24px] sm:text-2xl lg:text-[40px] leading-[140%] tracking-[-1px] sm:tracking-normal">
-                  {t.title}
+                  {t.quote}
                 </h3>
                 <p className="text-white/60 font-geometria sm:font-inter font-light sm:font-normal text-[15px] sm:text-base lg:text-xl leading-[120%] sm:leading-[180%] mt-0 sm:-mt-[17px]">
-                  {t.text}
+                  {t.description}
                 </p>
               </div>
               <div className="flex items-center gap-6">
                 <div className="relative w-16 h-16 lg:w-[70px] lg:h-[70px] rounded-full bg-[#CCCCCC] overflow-hidden">
-                  <Image src={t.image} alt="Testimonial" fill className="object-cover" />
+                  <Image src={t.authorPhoto} alt={t.authorName} fill className="object-cover" />
                 </div>
                 <div className="flex flex-col">
-                  <h4 className="text-white font-geometria sm:font-inter font-medium sm:font-semibold text-[16px] sm:text-[12px] lg:text-[20px] xl:text-[26px] leading-[130%]">{t.name}</h4>
-                  <p className="text-white/60 font-geometria sm:font-cabin font-medium text-[16px] lg:text-xl leading-[100%]">{t.company}</p>
+                  <h4 className="text-white font-geometria sm:font-inter font-medium sm:font-semibold text-[16px] sm:text-[12px] lg:text-[20px] xl:text-[26px] leading-[130%]">{t.authorName}</h4>
+                  <p className="text-white/60 font-geometria sm:font-cabin font-medium text-[16px] lg:text-xl leading-[100%]">{t.authorCompany}</p>
                 </div>
               </div>
             </div>
