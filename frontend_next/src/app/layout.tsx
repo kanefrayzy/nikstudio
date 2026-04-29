@@ -77,7 +77,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://nikstudio.pro" />
         <link rel="dns-prefetch" href="https://nikstudio.pro" />
       </head>
-      <body className={`${inter.variable} ${cabin.variable} ${geometria.variable}`}>
+      <body className={`${inter.variable} ${cabin.variable} ${geometria.variable} max-w-[2560px] mx-auto overflow-x-hidden`}>
         {children}
       </body>
     </html>
