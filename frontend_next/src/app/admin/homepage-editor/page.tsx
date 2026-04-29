@@ -18,7 +18,6 @@ import { HeroSectionEditor } from "@/components/admin/HeroSectionEditor"
 import { MainContentSectionEditor } from "@/components/admin/MainContentSectionEditor"
 import { ServicesSectionEditor } from "@/components/admin/ServicesSectionEditor"
 import { TestimonialsSectionEditor } from "@/components/admin/TestimonialsSectionEditor"
-import { GalleryBoxSectionEditor } from "@/components/admin/GalleryBoxSectionEditor"
 
 // Принудительно делаем страницу динамической для продакшн сборки
 export const dynamic = 'force-dynamic'
@@ -335,12 +334,11 @@ export default function HomepageEditorPage() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="hero">Hero</TabsTrigger>
               <TabsTrigger value="main_content">Контент</TabsTrigger>
               <TabsTrigger value="services">Услуги</TabsTrigger>
               <TabsTrigger value="testimonials">Отзывы</TabsTrigger>
-              <TabsTrigger value="gallery_box">Галерея</TabsTrigger>
             </TabsList>
 
             <TabsContent value="hero" className="mt-6">
@@ -386,12 +384,6 @@ export default function HomepageEditorPage() {
               />
             </TabsContent>
 
-            <TabsContent value="gallery_box" className="mt-6">
-              <GalleryBoxSectionEditor
-                content={content.gallery_box || []}
-                onChange={(key, value) => handleContentChange('gallery_box', key, value)}
-              />
-            </TabsContent>
           </Tabs>
         </CardContent>
       </Card>

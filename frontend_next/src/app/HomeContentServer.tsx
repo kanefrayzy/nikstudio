@@ -12,7 +12,6 @@ import { SEOMetadataGenerator } from '@/lib/seo-metadata';
 import { getMediaUrl } from "@/lib/media-utils";
 import ProjectsSection from '@/components/ProjectsSection';
 import { getHomepageContent, getContentValue, getImageUrl, type HomepageContentBySections } from '@/lib/homepage-content';
-import PhotoGalleryBox from '@/components/PhotoGalleryBox';
 
 interface Project {
   id: number;
@@ -39,37 +38,6 @@ interface HomeContent {
 
 interface HomeContentServerProps {
   categoryId?: string;
-}
-
-interface GalleryPhoto {
-  src: string;
-  alt?: string;
-}
-
-// Fetch gallery box content
-async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
-  try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const response = await fetch(`${apiUrl}/api/homepage-content/gallery_box`, {
-      next: { revalidate: 0 },
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    const items: any[] = data?.data || [];
-    const photosItem = items.find((i: any) => i.content_key === 'gallery_box_photos');
-    if (!photosItem?.content_value) return [];
-    const parsed = JSON.parse(photosItem.content_value);
-    if (!Array.isArray(parsed) || parsed.length === 0) return [];
-    const base = apiUrl || '';
-    return parsed.map((p: any) => ({
-      src: p.src?.startsWith('http') || p.src?.startsWith('/')
-        ? p.src
-        : `${base}/storage/${p.src}`,
-      alt: p.alt || '',
-    }));
-  } catch {
-    return [];
-  }
 }
 
 // Fetch home content with ISR
@@ -129,11 +97,10 @@ async function getProjects(categoryId?: string | null): Promise<Project[]> {
 }
 
 export default async function HomeContentServer({ categoryId }: HomeContentServerProps) {
-  const [homeContent, projects, globalSettings, galleryPhotos] = await Promise.all([
+  const [homeContent, projects, globalSettings] = await Promise.all([
     getHomeContent(),
     getProjects(categoryId),
     SEOMetadataGenerator.fetchGlobalSettings(),
-    getGalleryPhotos(),
   ]);
 
   // Fetch homepage CMS content with fallback
@@ -145,14 +112,7 @@ export default async function HomeContentServer({ categoryId }: HomeContentServe
     // Will use fallback values in components
   }
 
-  const finalGalleryPhotos = galleryPhotos.length > 0 ? galleryPhotos : [
-    { src: '/images/home/testimonial-1.jpg', alt: 'Проект 1' },
-    { src: '/images/home/testimonial-2.jpg', alt: 'Проект 2' },
-    { src: '/images/home/testimonial-3.jpg', alt: 'Проект 3' },
-    { src: '/images/home/testimonial-4.jpg', alt: 'Проект 4' },
-    { src: '/images/home/testimonial-5.jpg', alt: 'Проект 5' },
-    { src: '/images/home/testimonial-6.jpg', alt: 'Проект 6' },
-  ];
+
 
   const fallbackImage = homeContent?.hero_fallback_image_url 
     ? getMediaUrl(homeContent.hero_fallback_image_url, "/images/home/hero-image.png") 
@@ -240,14 +200,6 @@ export default async function HomeContentServer({ categoryId }: HomeContentServe
       </div>
 
       <TestimonialsSection content={homepageContent} />
-
-      {/* Бокс-галерея с раскрывающимся блоком фотографий */}
-      <PhotoGalleryBox
-        title="Наши работы в кадре"
-        description="Подборка фотографий из реализованных проектов."
-        photos={finalGalleryPhotos}
-        defaultOpen={true}
-      />
     </>
   );
 }
