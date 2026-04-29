@@ -923,6 +923,7 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'content' => 'nullable|string',
+            'gallery_layout' => 'nullable|string|in:carousel,collage',
         ]);
 
         if ($validator->fails()) {
@@ -935,6 +936,7 @@ class ProjectController extends Controller
             'title' => $request->input('title'),
             'subtitle' => $request->input('subtitle'),
             'content' => $request->input('content'),
+            'gallery_layout' => $request->input('gallery_layout', 'carousel'),
             'order' => $maxOrder + 1,
         ]);
 
@@ -953,13 +955,14 @@ class ProjectController extends Controller
             'subtitle' => 'nullable|string|max:255',
             'content' => 'required|string',
             'order' => 'required|integer',
+            'gallery_layout' => 'nullable|string|in:carousel,collage',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'message' => 'Ошибка валидации', 'errors' => $validator->errors()], 422);
         }
 
-        $block->update($request->only(['title', 'subtitle', 'content', 'order']));
+        $block->update($request->only(['title', 'subtitle', 'content', 'order', 'gallery_layout']));
 
         return response()->json(['success' => true, 'message' => 'Текст блока успешно обновлен.', 'data' => $block]);
     }

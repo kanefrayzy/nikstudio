@@ -15,6 +15,11 @@ class ProjectDetailBlock extends Model
         'subtitle',
         'content',
         'order',  // Добавлено поле order
+        'gallery_layout',
+    ];
+
+    protected $attributes = [
+        'gallery_layout' => 'carousel',
     ];
 
     // Связь с внутренней страницей проекта

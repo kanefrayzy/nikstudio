@@ -76,6 +76,7 @@ interface ProjectBlock {
   subtitle?: string;
   content: string;
   order: number;
+  gallery_layout?: 'carousel' | 'collage';
   mediaItems: ProjectBlockMediaItem[];
 }
 
@@ -123,6 +124,7 @@ interface BlockTextFormData {
   subtitle: string;
   content: string;
   order: number;
+  gallery_layout: 'carousel' | 'collage';
 }
 
 interface MediaFormData {
@@ -172,13 +174,13 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
 
   // State for Project Blocks
   const [createBlockDialogOpen, setCreateBlockDialogOpen] = useState(false);
-  const [newBlockFormData, setNewBlockFormData] = useState({ title: '', subtitle: '', content: '', order: 0 });
+  const [newBlockFormData, setNewBlockFormData] = useState<{ title: string; subtitle: string; content: string; order: number; gallery_layout: 'carousel' | 'collage' }>({ title: '', subtitle: '', content: '', order: 0, gallery_layout: 'carousel' });
   const [blockDeleteDialogOpen, setBlockDeleteDialogOpen] = useState(false);
   const [blockToDelete, setBlockToDelete] = useState<ProjectBlock | null>(null);
   // Состояние для текстового контента блока
   const [blockTextDialogOpen, setBlockTextDialogOpen] = useState(false);
   const [blockToEditText, setBlockToEditText] = useState<ProjectBlock | null>(null);
-  const [blockTextFormData, setBlockTextFormData] = useState<BlockTextFormData>({ title: '', subtitle: '', content: '', order: 0 });
+  const [blockTextFormData, setBlockTextFormData] = useState<BlockTextFormData>({ title: '', subtitle: '', content: '', order: 0, gallery_layout: 'carousel' });
 
   // Состояние для медиа контента блока
   const [blockMediaCreateOpen, setBlockMediaCreateOpen] = useState(false);
@@ -309,12 +311,12 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
   };
 
   const resetBlockCreateForm = () => {
-    setNewBlockFormData({ title: '', subtitle: '', content: '', order: 0 });
+    setNewBlockFormData({ title: '', subtitle: '', content: '', order: 0, gallery_layout: 'carousel' });
   };
 
   // Reset form functions for block text editing
   const resetBlockTextEditForm = () => {
-    setBlockTextFormData({ title: '', subtitle: '', content: '', order: 0 });
+    setBlockTextFormData({ title: '', subtitle: '', content: '', order: 0, gallery_layout: 'carousel' });
     setBlockToEditText(null);
     setError(null);
   };
@@ -429,6 +431,7 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
         subtitle: block.subtitle,
         content: block.content,
         order: block.order,
+        gallery_layout: (block.gallery_layout as 'carousel' | 'collage') || 'carousel',
         mediaItems: mediaItems
       }
     }).sort((a, b) => a.order - b.order)
@@ -1040,7 +1043,7 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
     const nextOrder = projectDetail?.blocks && projectDetail.blocks.length > 0
       ? Math.max(...projectDetail.blocks.map(b => b.order)) + 1
       : 1;
-    setNewBlockFormData({ title: '', subtitle: '', content: '', order: nextOrder });
+    setNewBlockFormData({ title: '', subtitle: '', content: '', order: nextOrder, gallery_layout: 'carousel' });
     setCreateBlockDialogOpen(true);
   };
 
@@ -1070,7 +1073,7 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
 
   const handleOpenEditBlockTextDialog = (block: ProjectBlock) => {
     setBlockToEditText(block);
-    setBlockTextFormData({ title: block.title, subtitle: block.subtitle || '', content: block.content, order: block.order });
+    setBlockTextFormData({ title: block.title, subtitle: block.subtitle || '', content: block.content, order: block.order, gallery_layout: (block.gallery_layout as 'carousel' | 'collage') || 'carousel' });
     setBlockTextDialogOpen(true);
   };
 
@@ -2016,6 +2019,18 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-title" className="text-right">Заголовок</Label><Input id="block-title" value={newBlockFormData.title} onChange={(e) => setNewBlockFormData(p => ({ ...p, title: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-subtitle" className="text-right">Подзаголовок</Label><Input id="block-subtitle" value={newBlockFormData.subtitle} onChange={(e) => setNewBlockFormData(p => ({ ...p, subtitle: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-content" className="text-right">Контент</Label><Textarea id="block-content" value={newBlockFormData.content} onChange={(e) => setNewBlockFormData(p => ({ ...p, content: e.target.value }))} className="col-span-3" /></div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="block-layout" className="text-right">Галерея</Label>
+              <select
+                id="block-layout"
+                value={newBlockFormData.gallery_layout}
+                onChange={(e) => setNewBlockFormData(p => ({ ...p, gallery_layout: e.target.value as 'carousel' | 'collage' }))}
+                className="col-span-3 h-9 px-3 rounded-md border border-input bg-transparent text-sm shadow-sm"
+              >
+                <option value="carousel">Свайп-карусель (по умолчанию)</option>
+                <option value="collage">Коллаж с кнопкой «ещё фото»</option>
+              </select>
+            </div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-order" className="text-right">Порядок</Label><Input id="block-order" type="number" value={newBlockFormData.order} onChange={(e) => setNewBlockFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))} className="col-span-3" /></div>
           </div>
           <DialogFooter>
@@ -2032,6 +2047,18 @@ const ProjectDetailPage: React.FC<ProjectDetailPageProps> = ({ params }) => {
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-title" className="text-right">Заголовок</Label><Input id="block-title" value={blockTextFormData.title} onChange={(e) => setBlockTextFormData(p => ({ ...p, title: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-subtitle" className="text-right">Подзаголовок</Label><Input id="block-subtitle" value={blockTextFormData.subtitle} onChange={(e) => setBlockTextFormData(p => ({ ...p, subtitle: e.target.value }))} className="col-span-3" /></div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-content" className="text-right">Контент</Label><Textarea id="block-content" value={blockTextFormData.content} onChange={(e) => setBlockTextFormData(p => ({ ...p, content: e.target.value }))} className="col-span-3" /></div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="block-layout-edit" className="text-right">Галерея</Label>
+              <select
+                id="block-layout-edit"
+                value={blockTextFormData.gallery_layout}
+                onChange={(e) => setBlockTextFormData(p => ({ ...p, gallery_layout: e.target.value as 'carousel' | 'collage' }))}
+                className="col-span-3 h-9 px-3 rounded-md border border-input bg-transparent text-sm shadow-sm"
+              >
+                <option value="carousel">Свайп-карусель (по умолчанию)</option>
+                <option value="collage">Коллаж с кнопкой «ещё фото»</option>
+              </select>
+            </div>
             <div className="grid grid-cols-4 items-center gap-4"><Label htmlFor="block-order" className="text-right">Порядок</Label><Input id="block-order" type="number" value={blockTextFormData.order} onChange={(e) => setBlockTextFormData(p => ({ ...p, order: parseInt(e.target.value) || 0 }))} className="col-span-3" /></div>
           </div>
           <DialogFooter>

@@ -95,6 +95,14 @@
             <div class="field-label">Сообщение:</div>
             <div class="field-value message-content">{{ $contactData['message'] }}</div>
         </div>
+
+        <div class="field">
+            <div class="field-label">Согласия:</div>
+            <div class="field-value">
+                Обработка ПД: {{ !empty($contactData['consent_personal_data']) ? 'Да' : 'Нет' }}<br>
+                Новостная/рекламная рассылка: {{ !empty($contactData['marketing_consent']) ? 'Да' : 'Нет' }}
+            </div>
+        </div>
     </div>
 
     <div class="footer">

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ContactEmailService, ContactFormData, EmailServiceError } from '@/lib/services/ContactEmailService';
 
 type ContactFormProps = {
@@ -14,6 +15,7 @@ type FieldErrors = {
   email: string[];
   company: string[];
   message: string[];
+  consent_personal_data: string[];
 };
 
 type TouchedFields = {
@@ -21,6 +23,7 @@ type TouchedFields = {
   email: boolean;
   company: boolean;
   message: boolean;
+  consent_personal_data: boolean;
 };
 
 const ContactForm = ({ className = "", source = 'contact', projectTitle }: ContactFormProps) => {
@@ -30,6 +33,10 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
     company: '',
     message: ''
   });
+  const [consentPersonalData, setConsentPersonalData] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [showPrivacyText, setShowPrivacyText] = useState(false);
+  const [showMarketingText, setShowMarketingText] = useState(false);
 
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
@@ -37,13 +44,15 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
     name: false,
     email: false,
     company: false,
-    message: false
+    message: false,
+    consent_personal_data: false
   });
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({
     name: [],
     email: [],
     company: [],
-    message: []
+    message: [],
+    consent_personal_data: []
   });
 
   // Validation functions
@@ -123,14 +132,23 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
       name: true,
       email: true,
       company: true,
-      message: true
+      message: true,
+      consent_personal_data: true
     });
 
     const nameErrors = validateField('name', formData.name);
     const emailErrors = validateField('email', formData.email);
     const messageErrors = validateField('message', formData.message);
+    const consentErrors: string[] = consentPersonalData
+      ? []
+      : ['Необходимо согласие на обработку персональных данных'];
+    setFieldErrors(prev => ({ ...prev, consent_personal_data: consentErrors }));
 
-    const hasErrors = nameErrors.length > 0 || emailErrors.length > 0 || messageErrors.length > 0;
+    const hasErrors =
+      nameErrors.length > 0 ||
+      emailErrors.length > 0 ||
+      messageErrors.length > 0 ||
+      consentErrors.length > 0;
 
     if (hasErrors) {
       setSubmitStatus('error');
@@ -152,7 +170,9 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
         company: formData.company,
         message: formData.message,
         source,
-        project_title: projectTitle
+        project_title: projectTitle,
+        consent_personal_data: consentPersonalData,
+        marketing_consent: marketingConsent
       };
 
       // Call appropriate email service method based on source
@@ -171,17 +191,21 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
           company: '',
           message: ''
         });
+        setConsentPersonalData(false);
+        setMarketingConsent(false);
         setTouchedFields({
           name: false,
           email: false,
           company: false,
-          message: false
+          message: false,
+          consent_personal_data: false
         });
         setFieldErrors({
           name: [],
           email: [],
           company: [],
-          message: []
+          message: [],
+          consent_personal_data: []
         });
       } else {
         setSubmitStatus('error');
@@ -321,6 +345,99 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
           {submitMessage}
         </div>
       )}
+
+      {/* Consent checkboxes */}
+      <div className="flex flex-col gap-4 sm:gap-5 mt-2">
+        {/* Privacy consent (required) */}
+        <div className="flex flex-col gap-2">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={consentPersonalData}
+              onChange={(e) => {
+                setConsentPersonalData(e.target.checked);
+                if (touchedFields.consent_personal_data) {
+                  setFieldErrors(prev => ({
+                    ...prev,
+                    consent_personal_data: e.target.checked
+                      ? []
+                      : ['Необходимо согласие на обработку персональных данных']
+                  }));
+                }
+              }}
+              onBlur={() => setTouchedFields(prev => ({ ...prev, consent_personal_data: true }))}
+              className="mt-1 h-5 w-5 shrink-0 accent-[#DE063A] cursor-pointer"
+              aria-required="true"
+            />
+            <span className="text-white/80 font-inter text-sm sm:text-base leading-relaxed">
+              Я даю согласие на обработку персональных данных в соответствии с{' '}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowPrivacyText(v => !v); }}
+                className="underline underline-offset-2 text-white hover:text-[#DE063A] transition-colors"
+              >
+                Политикой обработки персональных данных
+              </button>
+              {' *'}
+            </span>
+          </label>
+          {showPrivacyText && (
+            <div className="ml-8 p-4 bg-[#181A1B] border border-white/10 rounded-md text-white/70 font-inter text-xs sm:text-sm leading-relaxed space-y-2 max-h-64 overflow-y-auto">
+              <p>
+                Отправляя форму, я даю согласие ИП Никитин В.А. (ИНН 501306829802) на обработку
+                моих персональных данных (имя, email, название компании, текст сообщения) в целях
+                рассмотрения обращения и обратной связи.
+              </p>
+              <p>
+                Обработка персональных данных осуществляется в соответствии с Федеральным законом
+                от 27.07.2006 № 152-ФЗ «О персональных данных». Согласие может быть отозвано в любой
+                момент путём направления соответствующего обращения на info@nikstudio.pro.
+              </p>
+              <p>
+                Полный текст{' '}
+                <Link href="/privacy" className="underline hover:text-white">
+                  Политики обработки персональных данных
+                </Link>
+                .
+              </p>
+            </div>
+          )}
+          {touchedFields.consent_personal_data && fieldErrors.consent_personal_data.length > 0 && (
+            <div className="ml-8 text-sm text-red-400">
+              {fieldErrors.consent_personal_data[0]}
+            </div>
+          )}
+        </div>
+
+        {/* Marketing consent (optional) */}
+        <div className="flex flex-col gap-2">
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={marketingConsent}
+              onChange={(e) => setMarketingConsent(e.target.checked)}
+              className="mt-1 h-5 w-5 shrink-0 accent-[#DE063A] cursor-pointer"
+            />
+            <span className="text-white/80 font-inter text-sm sm:text-base leading-relaxed">
+              Я хочу получать полезные материалы и другие новостные и рекламные рассылки{' '}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); setShowMarketingText(v => !v); }}
+                className="underline underline-offset-2 text-white/60 hover:text-[#DE063A] transition-colors"
+              >
+                подробнее
+              </button>
+            </span>
+          </label>
+          {showMarketingText && (
+            <div className="ml-8 p-4 bg-[#181A1B] border border-white/10 rounded-md text-white/70 font-inter text-xs sm:text-sm leading-relaxed">
+              Отметив этот пункт, вы соглашаетесь получать на указанный email информационные
+              материалы NIK Studio: статьи, кейсы, анонсы услуг и специальные предложения.
+              Отписаться можно в любой момент по ссылке внизу любого письма.
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Submit Button */}
       <button

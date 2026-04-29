@@ -26,6 +26,10 @@ const CarouselWithLightboxBasic = dynamic(() => import('@/app/components/Carouse
   ssr: false,
 });
 
+const CollageGallery = dynamic(() => import('@/app/components/CollageGallery'), {
+  ssr: false,
+});
+
 // Утилитарная функция для нормализации путей к медиа файлам
 function normalizePath(path: string, isVideo: boolean = false): string {
   if (!path) return '';
@@ -292,12 +296,21 @@ export default function ProjectDetailClient() {
                 {/* Block Gallery - динамическое отображение */}
                 {blockCarouselData.length > 0 && (
                   <section className="flex flex-col gap-6 sm:-mt-9">
-                    <CarouselWithLightboxBasic
-                      images={blockCarouselData}
-                      className={index === 0 ? 'mt-[12px] sm:mt-0' :
-                        index === 1 ? '-mt-[50px] sm:mt-0' :
-                          '-mt-[25px] sm:mt-0'}
-                    />
+                    {block.gallery_layout === 'collage' ? (
+                      <CollageGallery
+                        images={blockCarouselData}
+                        className={index === 0 ? 'mt-[12px] sm:mt-0' :
+                          index === 1 ? '-mt-[50px] sm:mt-0' :
+                            '-mt-[25px] sm:mt-0'}
+                      />
+                    ) : (
+                      <CarouselWithLightboxBasic
+                        images={blockCarouselData}
+                        className={index === 0 ? 'mt-[12px] sm:mt-0' :
+                          index === 1 ? '-mt-[50px] sm:mt-0' :
+                            '-mt-[25px] sm:mt-0'}
+                      />
+                    )}
                   </section>
                 )}
               </div>

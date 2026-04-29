@@ -116,4 +116,16 @@ return [
         'name' => env('MAIL_FROM_NAME', 'NIK Studio'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Contact form recipient
+    |--------------------------------------------------------------------------
+    |
+    | The email address that will receive submissions from the contact and
+    | project inquiry forms on the website.
+    |
+    */
+
+    'contact_recipient' => env('MAIL_CONTACT_RECIPIENT', 'info@nikstudio.pro'),
+
 ];

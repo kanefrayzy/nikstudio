@@ -9,6 +9,7 @@ import ServicesSection from '@/app/home/ServicesSection';
 import ServiceSectionMobile from "@/app/home/ServicesSectionMobile";
 import TestimonialsSection from '@/app/home/TestimonialsSection';
 import MainContentSection from '@/app/home/MainContentSection';
+import PhotoGalleryBox from '@/components/PhotoGalleryBox';
 import HeroVideoSection from '@/components/HeroVideoSection';
 import HeroVideoErrorBoundary from '@/components/HeroVideoErrorBoundary';
 import StructuredDataComponent from '@/components/StructuredDataComponent';
@@ -412,6 +413,20 @@ export default function HomeContentClient() {
 
 
       <TestimonialsSection />
+
+      {/* Бокс-галерея с раскрывающимся блоком фотографий */}
+      <PhotoGalleryBox
+        title="Наши работы в кадре"
+        description="Подборка фотографий из реализованных проектов. Нажмите, чтобы развернуть."
+        photos={[
+          { src: '/images/home/testimonial-1.jpg', alt: 'Проект 1' },
+          { src: '/images/home/testimonial-2.jpg', alt: 'Проект 2' },
+          { src: '/images/home/testimonial-3.jpg', alt: 'Проект 3' },
+          { src: '/images/home/testimonial-4.jpg', alt: 'Проект 4' },
+          { src: '/images/home/testimonial-5.jpg', alt: 'Проект 5' },
+          { src: '/images/home/testimonial-6.jpg', alt: 'Проект 6' },
+        ]}
+      />
     </>
   );
 }

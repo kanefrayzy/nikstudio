@@ -22,6 +22,10 @@ Email: {{ $contactData['email'] }}
 Сообщение:
 {{ $contactData['message'] }}
 
+Согласия:
+- Обработка ПД: {{ !empty($contactData['consent_personal_data']) ? 'Да' : 'Нет' }}
+- Новостная/рекламная рассылка: {{ !empty($contactData['marketing_consent']) ? 'Да' : 'Нет' }}
+
 ИНФОРМАЦИЯ О ЗАПРОСЕ:
 --------------------
 Источник: Страница проекта ({{ $source }})

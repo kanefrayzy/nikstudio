@@ -233,6 +233,35 @@ export default function Footer() {
           </div>
           <BackToTopLink />
         </div>
+
+        {/* Office address & legal info */}
+        <div className="flex flex-col lg:flex-row justify-between gap-8 lg:gap-12 w-full pt-8 lg:pt-12 border-t border-[#0E1011]/10">
+          <div className="flex flex-col gap-2 max-w-xl">
+            <h4 className="text-[#0E1011]/60 text-base lg:text-lg font-geometria font-normal leading-[100%]">
+              Адрес офиса
+            </h4>
+            <a
+              href="https://yandex.com/maps/-/CPSMFP7R"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#0E1011] hover:text-[#DE063A] text-base lg:text-xl font-inter font-semibold leading-[140%] transition-colors duration-300"
+            >
+              Москва, посмотреть на Яндекс.Картах
+            </a>
+          </div>
+
+          <div className="flex flex-col gap-1 text-right lg:text-right">
+            <span className="text-[#0E1011]/60 text-base lg:text-lg font-geometria font-normal leading-[100%]">
+              Реквизиты
+            </span>
+            <span className="text-[#0E1011] text-base lg:text-xl font-inter font-semibold leading-[140%]">
+              ИП Никитин В.А.
+            </span>
+            <span className="text-[#0E1011]/80 text-sm lg:text-base font-inter leading-[140%]">
+              ИНН 501306829802
+            </span>
+          </div>
+        </div>
       </div>
     </footer>
   );

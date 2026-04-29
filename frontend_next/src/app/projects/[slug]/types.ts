@@ -19,6 +19,7 @@ export interface ProjectDetailBlock {
   subtitle: string;
   content: string;
   order: number;
+  gallery_layout?: 'carousel' | 'collage' | null;
   created_at: string;
   updated_at: string;
   media_items?: ProjectDetailBlockMedia[]; // Используем mediaItems как в Laravel модели

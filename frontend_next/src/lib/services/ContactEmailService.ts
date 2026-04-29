@@ -8,6 +8,8 @@ export interface ContactFormData {
   message: string;
   source?: 'project' | 'contact';
   project_title?: string;
+  consent_personal_data?: boolean;
+  marketing_consent?: boolean;
 }
 
 // Interface for API response

@@ -27,7 +27,9 @@ class ContactEmailRequest extends FormRequest
             'company' => 'nullable|string|max:100',
             'message' => 'required|string|min:10|max:1000',
             'source' => 'required|in:project,contact',
-            'project_title' => 'nullable|string|max:255'
+            'project_title' => 'nullable|string|max:255',
+            'consent_personal_data' => 'required|accepted',
+            'marketing_consent' => 'nullable|boolean'
         ];
     }
 
@@ -60,7 +62,11 @@ class ContactEmailRequest extends FormRequest
             'source.in' => 'Источник должен быть "project" или "contact"',
             
             'project_title.string' => 'Название проекта должно быть строкой',
-            'project_title.max' => 'Название проекта не должно превышать 255 символов'
+            'project_title.max' => 'Название проекта не должно превышать 255 символов',
+
+            'consent_personal_data.required' => 'Необходимо согласие на обработку персональных данных',
+            'consent_personal_data.accepted' => 'Необходимо согласие на обработку персональных данных',
+            'marketing_consent.boolean' => 'Поле согласия на рассылку должно быть логическим значением'
         ];
     }
 
@@ -77,7 +83,9 @@ class ContactEmailRequest extends FormRequest
             'company' => 'компания',
             'message' => 'сообщение',
             'source' => 'источник',
-            'project_title' => 'название проекта'
+            'project_title' => 'название проекта',
+            'consent_personal_data' => 'согласие на обработку персональных данных',
+            'marketing_consent' => 'согласие на рассылку'
         ];
     }
 }
