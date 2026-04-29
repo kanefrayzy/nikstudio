@@ -457,6 +457,7 @@ export default function HomeContentClient() {
         title={galleryTitle}
         description={galleryDescription}
         photos={galleryPhotos}
+        defaultOpen={true}
       />
     </>
   );
