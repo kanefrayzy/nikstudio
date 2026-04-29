@@ -44,6 +44,7 @@ export interface HomepageContentBySections {
   testimonials_4?: HomepageContent[];
   testimonials_5?: HomepageContent[];
   testimonials_6?: HomepageContent[];
+  gallery_box?: HomepageContent[];
   [key: string]: HomepageContent[] | undefined;
 }
 

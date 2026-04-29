@@ -48,6 +48,16 @@ export default function HomeContentClient() {
   const [globalSettings, setGlobalSettings] = useState<any>(null);
   const [heroVideoLoading, setHeroVideoLoading] = useState(true);
   const [heroVideoError, setHeroVideoError] = useState<string | null>(null);
+  const [galleryTitle, setGalleryTitle] = useState('Наши работы в кадре');
+  const [galleryDescription, setGalleryDescription] = useState('Подборка фотографий из реализованных проектов. Нажмите, чтобы развернуть.');
+  const [galleryPhotos, setGalleryPhotos] = useState<{ src: string; alt: string }[]>([
+    { src: '/images/home/testimonial-1.jpg', alt: 'Проект 1' },
+    { src: '/images/home/testimonial-2.jpg', alt: 'Проект 2' },
+    { src: '/images/home/testimonial-3.jpg', alt: 'Проект 3' },
+    { src: '/images/home/testimonial-4.jpg', alt: 'Проект 4' },
+    { src: '/images/home/testimonial-5.jpg', alt: 'Проект 5' },
+    { src: '/images/home/testimonial-6.jpg', alt: 'Проект 6' },
+  ]);
   const projectsSectionRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -96,6 +106,34 @@ export default function HomeContentClient() {
         // Fetch global SEO settings
         const globalSettingsData = await SEOMetadataGenerator.fetchGlobalSettings();
         setGlobalSettings(globalSettingsData);
+
+        // Fetch gallery box content
+        try {
+          const galleryResp = await fetch(`${apiUrl}/api/homepage-content/gallery_box`);
+          if (galleryResp.ok) {
+            const galleryData = await galleryResp.json();
+            const items: any[] = galleryData?.data || [];
+            const titleItem = items.find((i: any) => i.content_key === 'gallery_box_title');
+            const descItem = items.find((i: any) => i.content_key === 'gallery_box_description');
+            const photosItem = items.find((i: any) => i.content_key === 'gallery_box_photos');
+            if (titleItem?.content_value) setGalleryTitle(titleItem.content_value);
+            if (descItem?.content_value) setGalleryDescription(descItem.content_value);
+            if (photosItem?.content_value) {
+              try {
+                const parsed = JSON.parse(photosItem.content_value);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  const apiUrl2 = process.env.NEXT_PUBLIC_API_URL || '';
+                  setGalleryPhotos(parsed.map((p: any) => ({
+                    src: p.src?.startsWith('http') || p.src?.startsWith('/')
+                      ? p.src
+                      : `${apiUrl2}/storage/${p.src}`,
+                    alt: p.alt || '',
+                  })));
+                }
+              } catch {}
+            }
+          }
+        } catch {}
 
       } catch (error) {
         console.error('Ошибка при загрузке контента главной страницы:', error);
@@ -416,16 +454,9 @@ export default function HomeContentClient() {
 
       {/* Бокс-галерея с раскрывающимся блоком фотографий */}
       <PhotoGalleryBox
-        title="Наши работы в кадре"
-        description="Подборка фотографий из реализованных проектов. Нажмите, чтобы развернуть."
-        photos={[
-          { src: '/images/home/testimonial-1.jpg', alt: 'Проект 1' },
-          { src: '/images/home/testimonial-2.jpg', alt: 'Проект 2' },
-          { src: '/images/home/testimonial-3.jpg', alt: 'Проект 3' },
-          { src: '/images/home/testimonial-4.jpg', alt: 'Проект 4' },
-          { src: '/images/home/testimonial-5.jpg', alt: 'Проект 5' },
-          { src: '/images/home/testimonial-6.jpg', alt: 'Проект 6' },
-        ]}
+        title={galleryTitle}
+        description={galleryDescription}
+        photos={galleryPhotos}
       />
     </>
   );
