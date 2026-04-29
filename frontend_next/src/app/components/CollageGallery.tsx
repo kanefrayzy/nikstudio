@@ -40,13 +40,10 @@ const CollageGallery: React.FC<CollageGalleryProps> = ({
 
   // Сплющиваем все группы в плоский список фото
   const flatItems: CollageGalleryItem[] = images.flatMap((g) => g.items);
-
-  if (flatItems.length === 0) return null;
-
-  // Превью: первые 3 фото, остальные скрыты
   const restItems = flatItems.slice(3);
 
-  const openLightbox = (idx: number) => setActiveIndex(idx);
+  // Все хуки должны быть до любого return
+  const openLightbox = useCallback((idx: number) => setActiveIndex(idx), []);
   const closeLightbox = useCallback(() => setActiveIndex(null), []);
   const goPrev = useCallback(
     () => setActiveIndex((i) => (i !== null ? (i - 1 + flatItems.length) % flatItems.length : null)),
@@ -69,6 +66,9 @@ const CollageGallery: React.FC<CollageGalleryProps> = ({
     return () => window.removeEventListener('keydown', handler);
   }, [activeIndex, closeLightbox, goPrev, goNext]);
 
+  // Early return ПОСЛЕ всех хуков
+  if (flatItems.length === 0) return null;
+
   const renderThumb = (
     item: CollageGalleryItem,
     globalIdx: number,
@@ -78,7 +78,6 @@ const CollageGallery: React.FC<CollageGalleryProps> = ({
     const src = item.type === 'video' ? item.poster || item.src : item.src;
     return (
       <button
-        key={globalIdx}
         type="button"
         onClick={() => openLightbox(globalIdx)}
         className={`group relative ${aspectClass} w-full overflow-hidden bg-[#181A1B] focus:outline-none focus:ring-2 focus:ring-[#DE063A]`}
@@ -121,14 +120,16 @@ const CollageGallery: React.FC<CollageGalleryProps> = ({
         >
           <div className="overflow-hidden">
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-[2px] sm:gap-1">
-              {restItems.map((item, idx) =>
-                renderThumb(
-                  item,
-                  idx + 3,
-                  '(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw',
-                  'aspect-square'
-                )
-              )}
+              {restItems.map((item, idx) => (
+                <React.Fragment key={idx + 3}>
+                  {renderThumb(
+                    item,
+                    idx + 3,
+                    '(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw',
+                    'aspect-square'
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </div>
         </div>
