@@ -250,4 +250,8 @@ const CollageGallery: React.FC<CollageGalleryProps> = ({
           )}
         </div>
       )}
+    </section>
+  );
+};
+
 export default CollageGallery;
