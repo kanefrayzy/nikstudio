@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -33,6 +34,8 @@ class ContactInquiryMail extends Mailable
         return new Envelope(
             from: config('mail.from.address'),
             to: [config('mail.contact_recipient', 'info@nikstudio.pro')],
+            // Ответ из почтового клиента уходит клиенту, а не на наш же ящик
+            replyTo: [new Address($this->contactData['email'], $this->contactData['name'] ?? '')],
             subject: 'Новый запрос на сотрудничество',
         );
     }
