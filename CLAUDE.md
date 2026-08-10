@@ -78,6 +78,14 @@ The CMS is split across three unrelated storage strategies; know which one a pag
 2. **Structured entities** — `Project` → `ProjectDetail` → `ProjectDetailBlock` → `ProjectDetailBlockMedia`. Block media is grouped by `group_id` with `group_type` `single`/`double` so two files render as one paired unit; `ProjectDetailBlock.gallery_layout` (default `carousel`) chooses the renderer (see `src/app/components/CollageGallery.tsx`, `CarouselWithLightbox.tsx`). Blog posts follow the same block pattern (`BlogPost` → `BlogPostBlock`).
 3. **Media page** — its own dedicated tables (`MediaPageContent`, `MediaService`, `MediaServiceFeature`, `MediaServiceMedia`, `MediaTestimonial`, `MediaProcessStep`) with a public read-through endpoint `GET /api/public/media-page` plus a cache-refresh endpoint.
 
+### Заявки с сайта (contact form)
+
+`POST /api/contact/send` и `/api/contact/project` (обе формы — один компонент `src/components/ContactForm.tsx`). Порядок в `ContactController::handleInquiry`: проверка `SpamGuard` → запись в `contact_requests` → Telegram → письмо. Заявка сохраняется **до** отправки, поэтому отказ почты или Telegram не теряет лид и не даёт ошибку посетителю; статусы каналов лежат в `mail_sent`/`mail_error` и `telegram_sent`/`telegram_error`.
+
+`SpamGuard` не отбрасывает спам, а помечает `is_spam` + `spam_reason` и пропускает уведомления — ответ при этом обычный, успешный. Сигналы: скрытое поле `website`, метка `form_loaded_at` (быстрее 3 с — бот) и балльные эвристики (порог 3). При правке порогов помните: ложно отброшенный клиент дороже пропущенного спама.
+
+`trustProxies` в `bootstrap/app.php` обязателен — без него за nginx `request->ip()` даёт `127.0.0.1`, и `throttle:3,1` на контактных роутах становится общим лимитом для всех посетителей сразу.
+
 ### Media handling
 
 Uploads land in `storage/app/public` and are served through the `storage` symlink. Paths returned by the API are inconsistent (`/storage/...`, `storage/app/public/...`, bare relative) — **always** normalize through `getMediaUrl()` in `src/lib/media-utils.ts` rather than concatenating URLs. Any new host serving images must also be added to `images.remotePatterns` in `next.config.ts` or `next/image` will refuse it.
