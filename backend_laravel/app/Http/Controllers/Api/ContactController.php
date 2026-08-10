@@ -7,6 +7,8 @@ use App\Http\Requests\ContactEmailRequest;
 use App\Mail\ContactInquiryMail;
 use App\Mail\ProjectInquiryMail;
 use App\Models\ContactRequest;
+use App\Services\SpamGuard;
+use App\Services\TelegramNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Mailable;
@@ -16,6 +18,12 @@ use Exception;
 
 class ContactController extends Controller
 {
+    public function __construct(
+        private SpamGuard $spamGuard,
+        private TelegramNotifier $telegram,
+    ) {
+    }
+
     /**
      * Send contact form email for collaboration inquiries
      */
@@ -70,6 +78,10 @@ class ContactController extends Controller
     ): JsonResponse {
         $contactRequest = null;
 
+        // Спам сохраняем, но не рассылаем: бот получает обычный успешный ответ
+        // и не понимает, что заявка отфильтрована
+        $spamReason = $this->spamGuard->detect($request, $contactData);
+
         try {
             $contactRequest = ContactRequest::create([
                 'name' => $contactData['name'],
@@ -82,6 +94,8 @@ class ContactController extends Controller
                 'marketing_consent' => (bool) ($contactData['marketing_consent'] ?? false),
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
+                'is_spam' => $spamReason !== null,
+                'spam_reason' => $spamReason,
             ]);
 
             Log::info('Contact request saved', [
@@ -93,6 +107,8 @@ class ContactController extends Controller
                 'source' => $contactData['source'],
                 'ip' => $request->ip(),
                 'user_agent' => $request->userAgent(),
+                'is_spam' => $spamReason !== null,
+                'spam_reason' => $spamReason,
             ]);
         } catch (Exception $e) {
             // Не смогли сохранить в БД — отправка письма остаётся единственным шансом
@@ -100,6 +116,27 @@ class ContactController extends Controller
                 'error' => $e->getMessage(),
                 'source' => $contactData['source'] ?? null,
             ]);
+        }
+
+        // Спам дальше не идёт: ни письма, ни Telegram. Ответ при этом обычный,
+        // чтобы бот не начал подбирать обход фильтра
+        if ($spamReason !== null) {
+            Log::info('Contact request marked as spam', [
+                'contact_request_id' => $contactRequest?->id,
+                'reason' => $spamReason,
+                'ip' => $request->ip(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+            ], 200);
+        }
+
+        // Telegram — независимый канал: его сбой не влияет ни на почту, ни на ответ
+        if ($contactRequest && $this->telegram->isConfigured()) {
+            $result = $this->telegram->sendContactRequest($contactRequest);
+            $contactRequest->markTelegram($result['sent'], $result['error']);
         }
 
         try {

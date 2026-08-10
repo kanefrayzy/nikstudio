@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ContactEmailService, ContactFormData, EmailServiceError } from '@/lib/services/ContactEmailService';
 
@@ -35,6 +35,15 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
   });
   const [consentPersonalData, setConsentPersonalData] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
+
+  // Антиспам. Поле-приманка скрыто от людей — его заполняют только боты,
+  // которые проходят по всем input'ам формы
+  const [honeypot, setHoneypot] = useState('');
+  // Момент открытия формы: мгновенная отправка означает автозаполнение
+  const formLoadedAt = useRef(0);
+  useEffect(() => {
+    formLoadedAt.current = Date.now();
+  }, []);
   const [showPrivacyText, setShowPrivacyText] = useState(false);
   const [showMarketingText, setShowMarketingText] = useState(false);
 
@@ -172,7 +181,9 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
         source,
         project_title: projectTitle,
         consent_personal_data: consentPersonalData,
-        marketing_consent: marketingConsent
+        marketing_consent: marketingConsent,
+        website: honeypot,
+        form_loaded_at: formLoadedAt.current
       };
 
       // Call appropriate email service method based on source
@@ -193,6 +204,8 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
         });
         setConsentPersonalData(false);
         setMarketingConsent(false);
+        setHoneypot('');
+        formLoadedAt.current = Date.now();
         setTouchedFields({
           name: false,
           email: false,
@@ -240,6 +253,23 @@ const ContactForm = ({ className = "", source = 'contact', projectTitle }: Conta
       onSubmit={handleSubmit}
       className={`flex -mt-7 sm:mt-0 flex-col gap-4 sm:gap-6 lg:gap-8 3xl:gap-12 w-full ${className}`}
     >
+      {/*
+        Поле-приманка для ботов. Скрыто от людей и от скринридеров, исключено
+        из обхода по Tab и из автозаполнения — заполнить его может только бот.
+      */}
+      <div aria-hidden="true" className="sr-only">
+        <label htmlFor="contact-website">Не заполняйте это поле</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+        />
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-8 3xl:gap-12 w-full">
         {/* Name Field */}
         <div className="flex flex-col gap-3 3xl:gap-5 flex-1">

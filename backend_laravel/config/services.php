@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Дублирование заявок с сайта в Telegram
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id' => env('TELEGRAM_CHAT_ID'),
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 10),
+    ],
+
 ];

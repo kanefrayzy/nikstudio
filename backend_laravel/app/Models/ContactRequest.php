@@ -26,15 +26,21 @@ class ContactRequest extends Model
         'marketing_consent',
         'ip',
         'user_agent',
+        'is_spam',
+        'spam_reason',
         'mail_sent',
         'mail_error',
         'sent_at',
+        'telegram_sent',
+        'telegram_error',
     ];
 
     protected $casts = [
         'consent_personal_data' => 'boolean',
         'marketing_consent' => 'boolean',
+        'is_spam' => 'boolean',
         'mail_sent' => 'boolean',
+        'telegram_sent' => 'boolean',
         'sent_at' => 'datetime',
     ];
 
@@ -42,6 +48,18 @@ class ContactRequest extends Model
     public function scopeUndelivered($query)
     {
         return $query->where('mail_sent', false);
+    }
+
+    // Только настоящие заявки, без помеченных как спам
+    public function scopeLegit($query)
+    {
+        return $query->where('is_spam', false);
+    }
+
+    // Отфильтрованный спам
+    public function scopeSpam($query)
+    {
+        return $query->where('is_spam', true);
     }
 
     // Запросы по конкретному источнику: 'contact' или 'project'
@@ -66,6 +84,15 @@ class ContactRequest extends Model
         $this->update([
             'mail_sent' => false,
             'mail_error' => mb_substr($error, 0, 2000),
+        ]);
+    }
+
+    // Результат отправки в Telegram
+    public function markTelegram(bool $sent, ?string $error = null): void
+    {
+        $this->update([
+            'telegram_sent' => $sent,
+            'telegram_error' => $error ? mb_substr($error, 0, 2000) : null,
         ]);
     }
 }

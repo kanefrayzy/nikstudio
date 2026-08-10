@@ -10,6 +10,9 @@ export interface ContactFormData {
   project_title?: string;
   consent_personal_data?: boolean;
   marketing_consent?: boolean;
+  // Антиспам: скрытое поле-приманка и метка времени открытия формы (мс)
+  website?: string;
+  form_loaded_at?: number;
 }
 
 // Interface for API response
