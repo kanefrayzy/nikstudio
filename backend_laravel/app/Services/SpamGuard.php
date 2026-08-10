@@ -65,8 +65,9 @@ class SpamGuard
             $signals[] = "ссылок в тексте: {$links}";
         }
 
+        // Форумную разметку живые клиенты не пишут — признак достаточный сам по себе
         if ($this->hasBbCode($data['message'] ?? '')) {
-            $score += 2;
+            $score += 3;
             $signals[] = 'BBCode-разметка';
         }
 
