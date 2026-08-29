@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Cabin } from 'next/font/google';
 import localFont from 'next/font/local';
 import { generateHomeMetadata } from '@/lib/seo-helpers';
+import CookieConsent from '@/components/CookieConsent';
 import './globals.css';
 
 // Подключаем Google Fonts Inter
@@ -79,6 +80,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} ${cabin.variable} ${geometria.variable} max-w-[2560px] mx-auto overflow-x-hidden`}>
         {children}
+        <CookieConsent />
       </body>
     </html>
   );
